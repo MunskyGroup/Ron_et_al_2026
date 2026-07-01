@@ -1,0 +1,22 @@
+
+%Comparison of model fit and prediction errors:
+%Data Set & Linear & Constant & Nonlinear & Constant & Linear & Time-Varying & Nonlinear & Time-Varying & Detailed Mechanistic \hline \\ 
+\begin{tabular}{|l||l|l|l|l|l|}
+\hline
+\textbf{Data Set} & \makecell{\textbf{Linear}\\ \textbf{Constant}} & \makecell{\textbf{Nonlinear}\\ \textbf{Constant}} & \makecell{\textbf{Linear}\\ \textbf{Time-Varying}} & \makecell{\textbf{Nonlinear}\\ \textbf{Time-Varying}} & \makecell{\textbf{Detailed}\\ \textbf{Mechanistic}} \\ \hline \hline
+Nuc/Cyt, 100 nM Dex (Fit) & -124 & -214 & -103 & -4 & 0 \\ \hline
+TS, 100 nM Dex (Fit) & -4 & -2 & -3 & 0 & -2 \\ \hline
+Nuc/Cyt, 0 min Tpl (Fit) & -19 & -28 & -32 & -16 & 0 \\ \hline
+{\bf Total Fit Error} & -147 & -245 & -139 & -20 & -2 \\ \hline\hline
+Nuc/Cyt, 0.3 nM Dex (Predict) & -27 & -29 & -48 & -26 & 0 \\ \hline
+Nuc/Cyt, 1.0 nM Dex (Predict) & -40 & -64 & -41 & -31 & 0 \\ \hline
+Nuc/Cyt, 10 nM Dex (Predict) & -39 & -77 & -44 & -6 & 0 \\ \hline
+TS, 0.3 nM Dex (Predict) & -1 & -1 & -0 & 0 & -4 \\ \hline
+TS, 1.0 nM Dex (Predict) & -1 & -0 & -0 & 0 & -2 \\ \hline
+TS, 10 nM Dex (Predict) & -2 & -2 & -1 & 0 & -0 \\ \hline
+Nuc/Cyt, 20 min Tpl (Predict) & -10 & -36 & -5 & 0 & -2 \\ \hline
+Nuc/Cyt, 75 min Tpl (Predict) & 0 & -8 & -4 & -0 & -2 \\ \hline
+Nuc/Cyt, 150 min Tpl (Predict) & -21 & -36 & -16 & 0 & -9 \\ \hline
+Nuc/Cyt, 180 min Tpl (Predict) & -7 & -28 & -8 & -9 & 0 \\ \hline
+{\bf Total Prediction Error} & -147 & -282 & -169 & -73 & -19 \\ \hline
+\end{tabular}

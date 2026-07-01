@@ -1,0 +1,29 @@
+
+
+
+%MH sample means and standard deviations (linear scale): 
+%Model & MLE & Posterior mean $\pm$ STD)  \\ \hline 
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Description (units)} & \textbf{Parameter} & \textbf{MLE Value} &\textbf{Posterior Mean $\pm$ STD}\\ \hline \hline
+Basal gene inactivation rate (min$^{-1}$)&      $k_{off}$ & 6.11e-01 & 9.05e-01 $\pm$ 1.96e-01  \\ \hline
+Basal gene activation rate (min$^{-1}$)&     $k_{on,0}$ & 3.55e-02 & 3.67e-02 $\pm$ 8.34e-03  \\ \hline
+nucGR-dependent gene activation rate (min$^{-1}$)&        $TTP_1$ & 3.48e-03 & 4.08e-03 $\pm$ 6.41e-04  \\ \hline
+nucGR modulation of inactivation (molecules$^{-1}$)&      $t_{TTP}$ & 7.86e-02 & 5.71e-02 $\pm$ 2.28e-02  \\ \hline
+Basal DUSP1 transcription rate (min$^{-1}$)&    $kr_{on,0}$ & 6.79e+00 & 9.81e+00 $\pm$ 1.83e+00  \\ \hline
+nucGR-dependent DUSP1 transcription rate (min$^{-1}$)&         $\eta$ & 2.44e-07 & 1.47e-07 $\pm$ 5.60e-08  \\ \hline
+DUSP1 elongation time (min)& $\tau_{elong}$ & 1.36e+00 & 1.48e+00 $\pm$ 3.32e-01  \\ \hline
+DUSP1 nuclear export rate (min$^{-1}$)&       $k_{nc}$ & 7.12e-02 & 7.25e-02 $\pm$ 2.52e-03  \\ \hline
+Basal DUSP1 mRNA degradation rate (min$^{-1}$)& $k_{degCyt,0}$ & 5.07e-04 & 8.34e-05 $\pm$ 4.11e-05  \\ \hline
+Max TTP-dependent degradation rate (min$^{-1}$)& $k_{degCyt,1}$ & 8.74e-02 & 1.12e-01 $\pm$ 1.71e-02  \\ \hline
+nucGR-dependent TTP gene activation rate (min$^{-1}$)&     $k_{on,1}$ & 2.10e-02 & 3.06e-02 $\pm$ 1.84e-02  \\ \hline
+TTP gene inactivation rate (min$^{-1}$)&     $m_{koff}$ & 2.26e+00 & 6.33e+00 $\pm$ 3.75e+00  \\ \hline
+TTP transcription rate (min$^{-1}$)&   $k_{r,on,1}$ & 1.02e+00 & 2.23e+00 $\pm$ 1.06e+00  \\ \hline
+TTP nuclear export rate (min$^{-1}$)&    kon_{TTP,1} & 1.17e-02 & 1.26e-02 $\pm$ 3.33e-03  \\ \hline
+Basal TTP mRNA degradation rate (min$^{-1}$)&       k_{bind} & 2.09e-03 & 2.13e-03 $\pm$ 2.24e-03  \\ \hline
+TTP translation rate (min$^{-1}$)&     koff_{TTP} & 6.65e-01 & 6.05e-01 $\pm$ 1.62e-01  \\ \hline
+TTP protein degradation rate (min$^{-1}$)&    kr_{on,TTP} & 1.42e+00 & 3.28e-01 $\pm$ 3.99e-01  \\ \hline
+TTP–mRNA binding rate (min$^{-1}$ mol$^{-1}$)&     k_{TTP,nc} & 4.21e+00 & 9.65e+00 $\pm$ 3.78e+00  \\ \hline
+TTP–mRNA unbinding rate (min$^{-1}$)&\gamma_{TTP-Prot} & 4.11e-02 & 2.90e-02 $\pm$ 1.26e-02  \\ \hline
+Hill coefficient, TTP–mRNA binding&  k_{translate} & 7.48e-02 & 3.51e-02 $\pm$ 2.59e-02  \\ \hline
+\end{tabular}

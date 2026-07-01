@@ -1,0 +1,12 @@
+
+%Comparison of models for DUSP1 TS and Nuclear mRNA models:
+\begin{tabular}{|l||c|c|c|c|c|c|}\hline
+& $K_{OFF}$ & $K_{ON}$ & $K_{R}$& $K_{OFF},K_{ON}$ & $K_{OFF},K_{ON},K_{R}$  \\ \hline\hline
+Num.\ Parameters & 7 & 7 & 7 & 8 & 9 \\ \hline
+$\log(MAP/MAP_{\rm best})_{Nuc}$ & -54 & -16 & -218 & 0 & -0 \\ \hline
+$\log(MAP/MAP_{\rm best})_{TS}$ & -90 & 0 & -132 & -11 & -11 \\ \hline
+$\log(MAP/MAP_{\rm best})_{Tot}$ & -133 & -5 & -339 & 0 & -0 \\ \hline
+AIC - AIC$_{\rm best}$ & 264 & 9 & 676 & 0 & 2 \\ \hline
+BIC - BIC$_{\rm best}$ & 258 & 2 & 669 & 0 & 8 \\ \hline
+$\log(BF_{\rm approx})$ & -129 & -1 & -335 & 0 & -4 \\ \hline
+\end{tabular}

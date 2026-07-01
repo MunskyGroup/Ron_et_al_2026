@@ -1,0 +1,17 @@
+
+
+
+%MH sample means and standard deviations (linear scale): 
+%Model & MLE & Posterior mean $\pm$ STD)  \\ \hline 
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Description (units)} & \textbf{Parameter} & \textbf{MLE Value} &\textbf{Posterior Mean $\pm$ STD}\\ \hline \hline
+GR transport Cyt$\rightarrow$Nuc, basal (min$^{-1}$)&      $k_{cn0}$ & 6.02e-03 & 6.04e-03 $\pm$ 1.65e-04  \\ \hline
+GR transport Cyt$\rightarrow$Nuc, Dex-dependent (min$^{-1}$)&      $k_{cn1}$ & 1.15e-01 & 1.15e-01 $\pm$ 2.56e-03  \\ \hline
+Dex degradation rate, effectively zero (min$^{-1}$)&      $g_{Dex}$ & 6.76e-07 & 1.66e-06 $\pm$ 3.15e-06  \\ \hline
+GR transport Nuc$\rightarrow$Cyt (min$^{-1}$)&       $k_{nc}$ & 1.88e-02 & 1.87e-02 $\pm$ 6.61e-04  \\ \hline
+GR synthesis rate, Cyt (min$^{-1}$)&       $k_{GR}$ & 4.82e-02 & 4.80e-02 $\pm$ 9.20e-03  \\ \hline
+GR degradation, Cyt (min$^{-1}$)&$\gamma_{GRcyt}$ & 1.24e-03 & 1.24e-03 $\pm$ 3.42e-04  \\ \hline
+GR degradation, Nuc (min$^{-1}$)&$\gamma_{GRnuc}$ & 4.40e-03 & 4.37e-03 $\pm$ 4.47e-04  \\ \hline
+Michaelis constant for Dex-induced import (nM)&      $M_{Dex}$ & 1.17e+01 & 1.19e+01 $\pm$ 2.84e-01  \\ \hline
+\end{tabular}

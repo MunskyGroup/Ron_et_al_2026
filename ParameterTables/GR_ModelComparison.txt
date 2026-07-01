@@ -1,0 +1,10 @@
+
+%Comparison of GR model fit errors:
+\begin{tabular}{|l||c|c|c|c|}\hline
+& Import,$\gamma_{\rm nuc},\gamma_{\rm cyt}$ & Import,$\gamma_{\rm cyt}$ & Import,$\gamma_{\rm nuc}$ & Export,$\gamma_{\rm nuc},\gamma_{\rm cyt}$ \\ \hline\hline
+Num.\ Parameters & 8 & 7 & 7 & 8 \\ \hline
+$\log(MAP/MAP_{\rm best})$ & 0 & -913 & -128 & -19194 \\ \hline
+AIC - AIC$_{\rm best}$ & 0 & 1825 & 253 & 38388 \\ \hline
+BIC - BIC$_{\rm best}$ & 0 & 1818 & 246 & 38388 \\ \hline
+$\log(aBF_{\rm BIC})$ & 0 & -909 & -123 & -19194 \\ \hline
+\end{tabular}
