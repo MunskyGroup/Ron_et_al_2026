@@ -1,4 +1,4 @@
-# Ron et al. (2026) Analysis Repository
+# Ron et al. (2026) Analysis Codes
 
 This repository contains the code, model files, parameter tables, and saved outputs used for the analyses and figures in the Ron et al. 2026 manuscript.
 
@@ -23,7 +23,10 @@ Simple clone step:
 git clone https://github.com/MunskyGroup/SSIT.git
 ```
 
-After cloning, follow the remaining installation/setup instructions in the SSIT repository README.
+After cloning, follow the remaining installation/setup instructions in the SSIT repository README. Specifically, navigate to the SSIT directory and run the command:
+'''MATLAB
+install(0,0)
+'''
 
 ## Reproduce Analyses And Figures
 
