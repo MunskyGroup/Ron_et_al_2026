@@ -483,7 +483,7 @@ for iModel = DUSP1modelnuc
 
     if refitDUSP1nuc
         % Solve once to define FSP projection
-        [~,~,DUSP1_Model_100nM] = DUSP1_Model_100nM.solve;
+        DUSP1_Model_100nM = DUSP1_Model_100nM.solve;
 
         modelFile = ['savedModels/',DUSP1nucModelNames{iModel}];
         saveDcName = [DUSP1nucModelNames{iModel}];
@@ -510,7 +510,7 @@ for iModel = DUSP1modelnuc
             DUSP1parsAlt = exp(fminsearch(totalObj,log(DUSP1parsAlt),fitOptions));
             eval([savedNucParSet{iModel},'=DUSP1parsAlt;']);
             DUSP1_Model_100nM.parameters(DUSP1_Model_100nM.fittingOptions.modelVarsToFit,2) = num2cell(DUSP1parsAlt);
-            [~,~,DUSP1_Model_100nM] = DUSP1_Model_100nM.solve;
+            DUSP1_Model_100nM = DUSP1_Model_100nM.solve;
             ModelTS.parameters(ModelTS.fittingOptions.modelVarsToFit,2) = num2cell(DUSP1parsAlt);
             save(savedParsFile,savedNucParSet{iModel},'-append')
             ifit = ifit+1;
@@ -597,7 +597,7 @@ for iModel = DUSP1modelnuc
 
         if makeTSPlots
             % Recreate the TS model using the saved best-fit parameters.
-            [~,~,DUSP1_Model_100nM] = DUSP1_Model_100nM.solve;
+            DUSP1_Model_100nM = DUSP1_Model_100nM.solve;
         
             ModelTS = DUSP1_Model_100nM;
             ModelTS.tSpan = unique(allData.time)';
@@ -959,7 +959,7 @@ if ~isempty(DUSP1modelcyt) && ~makePredictions % Skip this if only making predic
         ModelTS.parameters(indsFreePars,2) = num2cell(valsFreePars);
 
         % Solve once to generate SSA files
-        [~,~,SSAModel_100] = SSAModel_100.solve;
+        SSAModel_100 = SSAModel_100.solve;
 
         % DEBUG -- show mean of solution
         % mean(squeeze(SSAModel_100.Solutions.trajs(5:6,:,:)),3)'
@@ -1168,7 +1168,7 @@ end
 % DUSP1_Model_100nM.parameters([1,2,3,4,19,24,25,26],2) = num2cell(Pars_KON_KOFF_KR_zeroOFF);
 % DUSP1_Model_100nM.parameters(23,2) = {0};
 % 
-% [~,~,DUSP1_Model_100nM] = DUSP1_Model_100nM.solve;
+% DUSP1_Model_100nM = DUSP1_Model_100nM.solve;
 % 
 % DUSP1_Model_100nM.fittingOptions.logPrior = [];
 % [nucLikelihoodSpread,nucLikelihoodVec] = DUSP1_Model_100nM.estimateLikelihoodSpread(500);
@@ -1344,7 +1344,7 @@ if ~isempty(DUSP1modelcyt) && makePredictions
 
         % Determine a
         GRMod.parameters{13,2} = dexAn(iDex);
-        soln{1} = GRMod.solve;
+        soln{1} = GRMod.solve(returnType='soln');
         for i = 1:7
             P = sum(double(soln{1}.fsp{i}.p.data),1)';
             GRNucScale(i,iDex) = [0:length(P)-1]*P;
@@ -1511,7 +1511,7 @@ if ~isempty(DUSP1modelcyt) && makePredictions
             SSAModel.ssaOptions.nSimsPerExpt = 10000/length(SSAModel.tSpan);
 
             % Solve once to generate SSA files
-            % [~,~,SSAModel] = SSAModel.solve;
+            % SSAModel = SSAModel.solve;
 
             % Set the parameters to be fit.
             SSAModel.fittingOptions.modelVarsToFit = indsFreePars;
@@ -1711,7 +1711,7 @@ if makePlots && ~isempty(finalDUSP1model)
                 Mod = combined_GRModel.SSITModels{3};
                 Mod.parameters{13,2} = 0.3;
             end
-            soln{j} = Mod.solve;
+            soln{j} = Mod.solve(returnType='soln');
             for i = 1:7
                 P = sum(double(soln{j}.fsp{i}.p.data),1)';
                 GRNuc(i,j) = [0:length(P)-1]*P;
@@ -1857,7 +1857,7 @@ if makePlots && ~isempty(finalDUSP1model)
             fullSSAModel.ssaOptions.nSimsPerExpt = 10000/length(fullSSAModel.tSpan);
 
             % Solve and make plots.
-            [ssaSoln{iModel},~,fullSSAModel] = fullSSAModel.solve;
+            [ssaSoln{iModel},~,fullSSAModel] = fullSSAModel.solve(returnType='soln');
             
             % Nuc plots
             [~,figHandlesSSA(iModel,1:2)] = makeCytDistPlots(ssaSoln{iModel},fullSSAModel,...
@@ -1977,7 +1977,7 @@ if makeTitrPlots
             if finalDUSP1model<=8
                 % 
                 Mod.parameters{13,2} = DexConc(i);
-                [soln,~,Mod] = Mod.solve;
+                [soln,~,Mod] = Mod.solve(returnType='soln');
                 vGRNuc = zeros(1,length(soln.fsp));
                 for iT = 1:length(soln.fsp)
                     P = sum(double(soln.fsp{iT}.p.data),1)';
@@ -2003,7 +2003,7 @@ if makeTitrPlots
             ModelTtr.ssaOptions.nSimsPerExpt = 10000/length(ModelTtr.tSpan);
 
             ModelTtr.ssaOptions.computeFile = [];
-            [ModelPredDexTtrSoln,~,ModelTtr] = ModelTtr.solve;
+            [ModelPredDexTtrSoln,~,ModelTtr] = ModelTtr.solve(returnType='soln');
 
             % Transformation to results of SSA.  For example, could combine two species
             % into one.
@@ -2312,7 +2312,7 @@ if makeTPLPlots
             ModelTPl.ssaOptions.nSimsPerExpt = 10000/length(ModelTPl.tSpan);
 
             % Solve and make plots.
-            [ssaSolnTpl{iModel},~,ModelTPl] = ModelTPl.solve;
+            [ssaSolnTpl{iModel},~,ModelTPl] = ModelTPl.solve(returnType='soln');
         
             % Nuc Plots
             [~,figHandlesSSA_TPL(iModel,1:2)] = makeCytDistPlots(ssaSolnTpl{iModel},...

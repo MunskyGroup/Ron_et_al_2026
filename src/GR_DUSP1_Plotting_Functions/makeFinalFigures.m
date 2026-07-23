@@ -191,8 +191,10 @@ if wantGRDistributions
             if j==1
                 newFig.Name = ['Nuc GR (Dex = ',dex,' nM'];
                 ratio = ratio_N2C; % average ratio of nucleus to cytoplasm
-                xlimv = [0,65];
-                xticksv = 0:20:60;
+                % xlimv = [0,65];
+                % xticksv = 0:20:60;
+                xlimv = [0,35];
+                xticksv = [0,10,20,30];
                 if splitReps
                     hidePlts = [1,2,5,6,9,10]+2;
                     showPlts = [1,2,5,6,9,10];
@@ -268,7 +270,8 @@ if wantGRDistributions
                 % Adjust concentration scale for Nuclear GR.
                 for ich=1:length(h.Children)
                     if isprop(h.Children(ich),'XData')
-                        h.Children(ich).XData = h.Children(ich).XData/ratio;
+                        % h.Children(ich).XData = h.Children(ich).XData/ratio;
+                        h.Children(ich).XData = h.Children(ich).XData;
                     end
                 end
 
@@ -324,13 +327,16 @@ if buildGRMeansHelper
 
             % Adjust concentration scale for Nuclear GR.
             for ich=1:3
-                h.Children(ich).YData = h.Children(ich).YData/ratio;
+                % h.Children(ich).YData = h.Children(ich).YData/ratio;
+                h.Children(ich).YData = h.Children(ich).YData;
             end
             if isprop(h.Children(1),'YNegativeDelta')
-                h.Children(1).YNegativeDelta = h.Children(1).YNegativeDelta/ratio;
+                % h.Children(1).YNegativeDelta = h.Children(1).YNegativeDelta/ratio;
+                h.Children(1).YNegativeDelta = h.Children(1).YNegativeDelta;
             end
             if isprop(h.Children(1),'YPositiveDelta')
-                h.Children(1).YPositiveDelta = h.Children(1).YPositiveDelta/ratio;
+                % h.Children(1).YPositiveDelta = h.Children(1).YPositiveDelta/ratio;
+                h.Children(1).YPositiveDelta = h.Children(1).YPositiveDelta;
             end
 
             legend('','','','Model \mu \pm \sigma','Model \mu','Data \mu \pm \sigma ')
@@ -585,9 +591,9 @@ if wantGRModelComparison
 
     set(axsGRCompare{1}, 'XLim', [-10 190], 'YLim', [0 30], ...
         'XTick', 0:30:180, 'FontSize', 13);
-    set(axsGRCompare{2}, 'XLim', [-10 190], 'YLim', [0 62], ...
+    set(axsGRCompare{2}, 'XLim', [-10 190], 'YLim', [0 30], ...
         'XTick', 0:30:180, 'FontSize', 13);
-    set(axsGRCompare{3}, 'XLim', [-10 190], 'YLim', [14 41], ...
+    set(axsGRCompare{3}, 'XLim', [-10 190], 'YLim', [0 30], ...
         'XTick', 0:30:180, 'FontSize', 13);
 
     set(axsGRCompare{1}, 'XTickLabels', []);
@@ -672,8 +678,8 @@ if wantGRMeansAndVarsOnly
                 copyobj(children, axs{r,c}); % Copy all children to ax2
                 axs{r,c} = formatLines(axs{r,c}, C.NucGR_data);
                 recolorAxes(axs{r,c}, struct('dataColor', C.NucGR_data, 'modelLine', C.Model_line, 'shadeFromModel', false));
-                ylimv = [0,62];
-                yticks = 0:15:60;
+                ylimv = [0,30];
+                yticks = 0:10:30;
 
             elseif r==4 % Total GR = cytoplasmic + ratio*nuclear
 
@@ -818,8 +824,8 @@ if wantGRMeansAndVars&&~isempty(modelChoice)&&GRmodel==1
                 copyobj(children, axs{r,c}); % Copy all children to ax2
                 axs{r,c} = formatLines(axs{r,c}, C.NucGR_data);
                 recolorAxes(axs{r,c}, struct('dataColor', C.NucGR_data, 'modelLine', C.Model_line, 'shadeFromModel', false));
-                ylimv = [0,62];
-                yticks = 0:15:60;
+                ylimv = [0,30];
+                yticks = 0:10:30;
 
             elseif r==4 % Total GR = cytoplasmic + ratio*nuclear
 
@@ -1216,10 +1222,11 @@ if wantAllGR
 
             if mod(r,2)==0
                 copyobj(oldFig.Children(9-c).Children(1:2), axs{r,c});
-                set(gca,'YLim',[0,0.2],'XLim',[-2,65]);
+                set(gca,'YLim',[0,0.2],'XLim',[-2,35]);
                 ratio = ratio_N2C; %Average ratio of nucleus to cytoplasm.
                 for ich = 1:2
-                    axs{r,c}.Children(ich).XData = axs{r,c}.Children(ich).XData/ratio;
+                    % axs{r,c}.Children(ich).XData = axs{r,c}.Children(ich).XData/ratio;
+                    axs{r,c}.Children(ich).XData = axs{r,c}.Children(ich).XData;
                 end
                 axs{r,c}.Children(2).Color = C.NucGR_data;
                 axs{r,c}.Children(1).Color = C.Model_line;
@@ -1990,9 +1997,11 @@ upperNuc = yPolyNuc(end:-1:nNuc+1);
 lowerCyt = yPolyCyt(1:nCyt);
 upperCyt = yPolyCyt(end:-1:nCyt+1);
 
-% Convert nuclear GR to cytoplasm-scaled total amount before combining.
-muNuc  = (lowerNuc + upperNuc)/2 * ratio_N2C;
-stdNuc = (upperNuc - lowerNuc)/2 * ratio_N2C;
+% NOT NEEDED (already converted) Convert nuclear GR to cytoplasm-scaled total amount before combining.
+% muNuc  = (lowerNuc + upperNuc)/2 * ratio_N2C;
+% stdNuc = (upperNuc - lowerNuc)/2 * ratio_N2C;
+muNuc  = (lowerNuc + upperNuc)/2 ;
+stdNuc = (upperNuc - lowerNuc)/2 ;
 
 muCyt  = (lowerCyt + upperCyt)/2;
 stdCyt = (upperCyt - lowerCyt)/2;
@@ -2012,9 +2021,12 @@ if numel(yNuc) ~= numel(yCyt)
 end
 
 xData   = xCyt;
-yData   = yCyt + ratio_N2C*yNuc;
-ynegTot = sqrt(ynegCyt.^2 + (ratio_N2C*ynegNuc).^2);
-yposTot = sqrt(yposCyt.^2 + (ratio_N2C*yposNuc).^2);
+% yData   = yCyt + ratio_N2C*yNuc;
+% ynegTot = sqrt(ynegCyt.^2 + (ratio_N2C*ynegNuc).^2);
+% yposTot = sqrt(yposCyt.^2 + (ratio_N2C*yposNuc).^2);
+yData   = yCyt + yNuc;
+ynegTot = sqrt(ynegCyt.^2 + (ynegNuc).^2);
+yposTot = sqrt(yposCyt.^2 + (yposNuc).^2);
 
 % axes(ax);
 cla(ax);
@@ -2125,16 +2137,19 @@ end
 hData = pickDataErrorbar(errObjs);
 
 dataOut.x = hData.XData(:)';
-dataOut.y = hData.YData(:)' ./ ratio;
+% dataOut.y = hData.YData(:)' ./ ratio;
+dataOut.y = hData.YData(:)';
 
 if isprop(hData, 'YNegativeDelta') && ~isempty(hData.YNegativeDelta)
-    dataOut.yneg = hData.YNegativeDelta(:)' ./ ratio;
+    % dataOut.yneg = hData.YNegativeDelta(:)' ./ ratio;
+    dataOut.yneg = hData.YNegativeDelta(:)';
 else
     dataOut.yneg = zeros(size(dataOut.y));
 end
 
 if isprop(hData, 'YPositiveDelta') && ~isempty(hData.YPositiveDelta)
-    dataOut.ypos = hData.YPositiveDelta(:)' ./ ratio;
+    % dataOut.ypos = hData.YPositiveDelta(:)' ./ ratio;
+    dataOut.ypos = hData.YPositiveDelta(:)';
 else
     dataOut.ypos = zeros(size(dataOut.y));
 end
@@ -2168,7 +2183,8 @@ end
 hModel = lineObjs(bestIdx);
 
 modelOut.x = hModel.XData(:)';
-modelOut.y = hModel.YData(:)' ./ ratio;
+% modelOut.y = hModel.YData(:)' ./ ratio;
+modelOut.y = hModel.YData(:)';
 
 % Sort model curve by time:
 [modelOut.x, sortIdx] = sort(modelOut.x);

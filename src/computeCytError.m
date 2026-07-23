@@ -21,7 +21,7 @@ arguments
     creplicaGR = 7
 end
 Model.parameters(indsPars,2) = num2cell(x);
-ssaSoln = Model.solve;
+ssaSoln = Model.solve(returnType='soln');
 
 % Transformation to results of SSA.  For example, could combine two species
 % into one.

@@ -58,7 +58,7 @@ for iT = 1:NT
     tmpModelTSPresent.initialCondition(1) = 1;
     tmpModelTSPresent.initialCondition(5) = 0;
 
-    tsPresentSSASoln = tmpModelTSPresent.solve;
+    tsPresentSSASoln = tmpModelTSPresent.solve(returnType='soln');
     soln{iT} = squeeze(tsPresentSSASoln.trajs(5,end,:)); 
     nRNAmax = max(nRNAmax,max(soln{iT})+1);
 end

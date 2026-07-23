@@ -57,7 +57,7 @@ ModelTSPast.initialTime = -200-tau_elong;
 % if nargout==1
 %     ModelTSPast.tSpan = ModelTSPast.tSpan(1:2);
 % end
-TSPastSoln = ModelTSPast.solve;
+TSPastSoln = ModelTSPast.solve(returnType='soln');
 NT = length(TSPastSoln.fsp)-1;
 
 % For the present model we start one elongation period in the past and then 
@@ -77,7 +77,7 @@ for iT = 1:NT
     tmpModelTSPresent = ModelTSPresent.setICfromFspVector(TSPastSoln.stateSpace,TSPastSoln.fsp{iT+1});
     tmpModelTSPresent.tSpan = ModelTSPast.tSpan(iT+1)+[0,tau_elong/2,tau_elong];
     tmpModelTSPresent.initialTime = tmpModelTSPresent.tSpan(1);
-    tsPresentSoln = tmpModelTSPresent.solve;
+    tsPresentSoln = tmpModelTSPresent.solve(returnType='soln');
     fsp(iT) = tsPresentSoln.fsp(end); 
 end
 

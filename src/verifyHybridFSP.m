@@ -6,7 +6,7 @@ KON = KON.formPropensitiesGeneral('KON');
 KON.initialTime = -2000;
 KON.tSpan = [KON.tSpan];
 KON.solutionScheme = 'fsp';
-[~,~,KON] = KON.solve;
+KON = KON.solve;
 
 %%
 try
@@ -15,7 +15,7 @@ catch
 end
 KON.ssaOptions.Nsims = 1000000;
 KON.solutionScheme = 'ssa';
-[~,~,KON] = KON.solve;
+KON = KON.solve;
 
 %% Call function to make verification plots.
 KON = KON.verifyFSPandSSA(speciesNames={'rna'});
@@ -32,7 +32,7 @@ for i = 1:100
     KON.Solutions = rmfield(KON.Solutions,'trajs');
     KON.ssaOptions.Nsims = 1000;
     KON.solutionScheme = 'ssa';
-    [~,~,KON] = KON.solve;
+    KON = KON.solve;
 
     P = double(KON.Solutions.fsp{end}.p.sumOver([1,2]).data);
     D = squeeze(KON.Solutions.trajs(5,end,:));

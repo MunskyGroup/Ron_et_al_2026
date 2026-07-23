@@ -64,7 +64,7 @@ for iM = 1:3
     % Set removed parameters to zero.
     Mod.parameters(zeroPars,2) = num2cell(zeros(length(zeroPars),1));
 
-    [~,~,Mod] = Mod.solve;
+    Mod = Mod.solve;
 
     Mod.fittingOptions.logPrior = [];
 
