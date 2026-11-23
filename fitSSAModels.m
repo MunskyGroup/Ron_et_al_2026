@@ -185,7 +185,7 @@ initWorkingParsFile(parsFile, opts.sourceParsFile, opts.grBinFile, opts.grBinMod
 ensureModelLibrary(cfg, opts.modelLibrary, opts.dataFileGR, opts.dataFileDusp1, opts.regenerateLibrary);
 try
     [SSAModel, ModelTS, allData, valsFreePars, log10PriorMean, log10PriorStd] = ...
-        setupModel(cfg, parsFile, opts.modelLibrary, opts.dataFileDusp1, parName);
+        setupModel(cfg, parsFile, opts.modelLibrary, opts.dataFileDusp1, parName, opts.tag);
 catch err
     if opts.regenerateLibrary
         rethrow(err);   % already rebuilt in this call
@@ -194,7 +194,7 @@ catch err
         cfg.name, err.message);
     ensureModelLibrary(cfg, opts.modelLibrary, opts.dataFileGR, opts.dataFileDusp1, true);
     [SSAModel, ModelTS, allData, valsFreePars, log10PriorMean, log10PriorStd] = ...
-        setupModel(cfg, parsFile, opts.modelLibrary, opts.dataFileDusp1, parName);
+        setupModel(cfg, parsFile, opts.modelLibrary, opts.dataFileDusp1, parName, opts.tag);
 end
 indsFreePars = cfg.indsFreePars;
 TSLikelihood = @(pars) computeTSlikelihood(pars, ModelTS, allData, 50, true, opts.outlierFraction);
@@ -512,7 +512,7 @@ end
 end
 
 function [SSAModel, ModelTS, allData, valsFreePars, log10PriorMean, log10PriorStd] = ...
-    setupModel(cfg, parsFile, modelLibrary, dataFileDusp1, parName)
+    setupModel(cfg, parsFile, modelLibrary, dataFileDusp1, parName, tag)
 % SSA model with nuclear and cytoplasmic DUSP1 data at 100 nM Dex, TS
 % model and data, free parameters and prior, set as in
 % GR_DUSP1_Fitting_Final for model cfg.fittingFinalModel.
@@ -555,6 +555,13 @@ SSAModel.parameters(zeroPars,2) = num2cell(zeros(size(zeroPars)));
 SSAModel.parameters(indsFreePars,2) = num2cell(valsFreePars);
 SSAModel.fittingOptions.modelVarsToFit = indsFreePars;
 SSAModel.solutionScheme = 'SSA';
+% Unique names for the generated SSA code. SSIT names it
+%   <pathToPropensityFuns>/<propensityFilePrefix>_TmpGPUSSACode.m
+% (plus ..._TmpGPUSSACode_SSA_mex.cpp and the compiled mex for the C++
+% SSA), and the library models share prefixes (models 1-4 all use
+% 'Full_GR_DUSP1_Model'), so concurrent fits would overwrite each
+% other's code. The prefix includes the run tag and the process ID.
+SSAModel.propensityFilePrefix = ssaCodePrefix(tag, '');
 if isunix && ~ismac && cfg.fittingFinalModel < 10
     % GR_DUSP1_Fitting_Final always turns the C++ SSA off here (quiet
     % failures with nonlinear propensities on Linux). Instead, test it:
@@ -594,8 +601,12 @@ model.ssaOptions.nSimsPerExpt = NaN;
 model.ssaOptions.Nsims = nSims;
 fprintf('Testing the C++ SSA against the MATLAB SSA (%d runs each)...\n', nSims);
 try
+    % Separate code files for the two versions (otherwise the second
+    % would overwrite the first).
     MC = model; MC.ssaOptions.useC = true;  MC.ssaOptions.computeFile = '';
     MM = model; MM.ssaOptions.useC = false; MM.ssaOptions.computeFile = '';
+    MC.propensityFilePrefix = [char(model.propensityFilePrefix), 'C'];
+    MM.propensityFilePrefix = [char(model.propensityFilePrefix), 'M'];
     % Write/compile once (untimed); the returned models keep the code.
     MC = MC.solve(solver='ssa');
     MM = MM.solve(solver='ssa');
@@ -634,6 +645,18 @@ catch err
     fprintf('C++ SSA test failed (%s); using the MATLAB SSA.\n', err.message);
     useC = false;
 end
+end
+
+function prefix = ssaCodePrefix(tag, suffix)
+% Prefix for this run's generated SSA code: 'SABC_<tag>_<pid><suffix>',
+% shortened so that the longest generated name
+% (<prefix>C_TmpGPUSSACode_SSA_mex) stays within MATLAB's 63-character
+% limit for function names.
+pid = feature('getpid');
+tagPart = regexprep(char(tag), '[^A-Za-z0-9_]', '_');
+maxTag = 40 - numel(sprintf('SABC__%d', pid)) - numel(suffix) - 1;
+tagPart = tagPart(1:min(end, max(1, maxTag)));
+prefix = sprintf('SABC_%s_%d%s', tagPart, pid, suffix);
 end
 
 function v = safeEval(fun, x)
