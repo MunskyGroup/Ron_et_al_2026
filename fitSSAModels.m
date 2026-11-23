@@ -559,7 +559,7 @@ if isunix && ~ismac && cfg.fittingFinalModel < 10
     % GR_DUSP1_Fitting_Final always turns the C++ SSA off here (quiet
     % failures with nonlinear propensities on Linux). Instead, test it:
     % use the C++ SSA only if it reproduces the MATLAB SSA and is faster.
-    SSAModel.ssaOptions.useC = useCppSSA(SSAModel, 1000);
+    SSAModel.ssaOptions.useC = useCppSSA(SSAModel, 40000);
 end
 % Write and compile the SSA code for this (possibly modified) model once.
 SSAModel.ssaOptions.computeFile = '';
