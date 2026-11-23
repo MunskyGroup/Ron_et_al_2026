@@ -1,6 +1,6 @@
 
 function [TSLikelihood,modelResults,dataResults] = computeTSlikelihood(pars, ...
-    ModelTS,allData,outlierThresh,reportErrors)
+    ModelTS,allData,outlierThresh,reportErrors,outlierFraction)
 arguments
     pars
     ModelTS
@@ -12,6 +12,19 @@ arguments
     % trincated to this value.  Model predictions for counts higher than
     % this value will also be integrated into a single bin "more than
     % outlierThresh".
+    outlierFraction (1,1) double {mustBeInRange(outlierFraction,0,1,'exclude-upper')} = 0
+    % Outlier-robust likelihood: each cell's observed TS count is modeled
+    % as coming from the model with probability 1-outlierFraction and from
+    % a uniform background q with probability outlierFraction, i.e.,
+    %   P_obs = (1-outlierFraction)*P_model + outlierFraction*q,
+    % applied to the final distribution of the observed two-allele sum.
+    % q is uniform over the values the data can take: 0 and
+    % TSthresh..outlierThresh (each spot is either 0 or >= TSthresh; the
+    % last value is the ">= outlierThresh" bin). This bounds the influence
+    % of single cells far in the model's tails. Default 0 = unchanged.
+    % Use the same value as for the nuclear/cytoplasmic SSA likelihood
+    % (kdeOutlierFraction) so both data types assume the same outlier
+    % fraction.
 end
     
 ModelTS.parameters(ModelTS.fittingOptions.modelVarsToFit,2) = num2cell(pars);
@@ -187,6 +200,14 @@ for iT=1:NT
     Pconv = conv(P,P); 
 
     P = [Pconv(1:outlierThresh);sum(Pconv(outlierThresh+1:end))];
+
+    % Outlier background (observable values only: 0 and >= TSthresh).
+    if outlierFraction > 0
+        q = zeros(size(P));
+        q([1, TSthresh+1:end]) = 1;
+        q = q/sum(q);
+        P = (1-outlierFraction)*P + outlierFraction*q;
+    end
 
     modelResults.meanNascentMod(iT) = [TSthresh:length(P)-1]*P(TSthresh+1:end);
     modelResults.meanNascentTSMod(iT) = [TSthresh:length(P)-1]*P(TSthresh+1:end)/(1-sum(P(1:TSthresh)));

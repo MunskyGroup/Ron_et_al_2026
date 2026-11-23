@@ -158,8 +158,10 @@ recomputeSSA = opts.recomputeSSA;
 %% Make GR Plots
 GRMods = [];
 if isfield(opts,'GRModels')
+    % Order must match GRModelNames in GR_DUSP1_Fitting_Final:
+    % {combinedGRModel, _CytDegOnly (gg2=0), _NucDegOnly (gg1=0), _DexExport}
     choices = {'DexControlsGRImport_NucCytDeg',...
-        'DexControlsGRImport_NucDeg','DexControlsGRImport_CytDeg',...
+        'DexControlsGRImport_CytDeg','DexControlsGRImport_NucDeg',...
         'DexControlsGRExport_NucCytDeg'};
     if strcmpi(opts.GRModels{1},'all')
         GRMods = [1:4];

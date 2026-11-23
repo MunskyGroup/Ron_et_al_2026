@@ -37,7 +37,7 @@ else
     distance2 = defaultTSValue*weights_ABC(2);
 end
 if ~isempty(log10PriorMean)&&~isempty(log10PriorStd)
-    priorDistance = sum((log10(reshape(x,[numel(x),1]))-log10PriorMean(indsAllPars)).^2./(2*log10PriorStd(indsAllPars)));
+    priorDistance = sum((log10(reshape(x,[numel(x),1]))-log10PriorMean(indsAllPars)).^2./(2*log10PriorStd(indsAllPars).^2));
 else
     priorDistance=0;
 end

@@ -1,14 +1,15 @@
 %% Predictions Made by Full Mechanistic Model
 addpath(genpath('src'));
 
-%% Load Mechanistic Model and Update to Latest Parameters.
+%% Load Mechanistic Model
 MechModel = dusp1ModelLibrary_Final('GR_DUSP1_TTP_Model_2',false);
 
+%% Update Update to Latest Parameters.
 savedParsFile ='savedParameters/Parameters_Final';
-indsFreePars =  [1,2,3,4,14,15,19,20,21,22,24,25,26,27:36];
+indsFreePars =  [1,2,3,4,14,15,19,24,25,26,27:36];
 MechModel.fittingOptions.modelVarsToFit = indsFreePars;
-load(savedParsFile,'Pars_GR_DUSP1_TTP_Model_All_2','GRpars');
-valsFreePars = Pars_GR_DUSP1_TTP_Model_All_2;
+load(savedParsFile,'Pars_GR_DUSP1_TTP_Model_All','GRpars');
+valsFreePars = Pars_GR_DUSP1_TTP_Model_All;
 zeroPars = [20,21,22,23];
 includeTS = true;
 transformSSAsoln = zeros(6,13);
@@ -26,7 +27,7 @@ MechModel.parameters(indsFreePars,2) = num2cell(valsFreePars);
 %         'propensity','degProt*rCyt_complex'  ,...
 %         'stoichiometry',{{'rCyt_complex',-1}}));
 
-MechModel = MechModel.changeParameter({'degProt',0.005});
+% MechModel = MechModel.changeParameter({'degProt',0.005});
 
 MechModel = MechModel.changeParameter({'TTP_eta',1.0});
 
@@ -43,10 +44,10 @@ load('savedParameters/MHResults_Pars_GR_DUSP1_TTP_Model_All_2')
 
 for j = 1:1
     iSamp = 5000+randi([0,5000]);
-    MechModel.parameters(indsFreePars,2) = num2cell(exp(MHResultsAll.mhSamples(iSamp,:)));
+    % MechModel.parameters(indsFreePars,2) = num2cell(exp(MHResultsAll.mhSamples(iSamp,:)));
     
     % Change Deg parameter
-    MechModel = MechModel.changeParameter({'degProt',0.005});
+    % MechModel = MechModel.changeParameter({'degProt',0.005});
 
     for i = 1:3
 

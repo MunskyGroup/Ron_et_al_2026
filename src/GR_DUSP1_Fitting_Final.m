@@ -148,8 +148,8 @@ for iModel = GRmodel
         logLikelihood = combined_GRModel.computeTotalLogLikelihood(GRparsAlt);
         
         % Compute FIM, H and Laplace approx of evidence
-        combined_GRModel = combined_GRModel.computeFIMs;
-        Happrox = combined_GRModel.FIM.totalFIM + diag(1./log10PriorStd(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit));
+        combined_GRModel = combined_GRModel.computeFIMs([],'log');
+        Happrox = combined_GRModel.FIM.totalFIM + diag(1./(log10PriorStd(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit).^2)/log(10)^2);
         k = length(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit);
         S.(['laplaceEvidence_', GRModelNames{iModel}]) = logLikelihood + 0.5*k*log(2*pi) - 0.5*log(det(Happrox));
         S.(['logLikelihood_', GRModelNames{iModel}]) = logLikelihood;
@@ -171,8 +171,8 @@ for iModel = GRmodel
         GRLogPost(iModel) = logLikelihood;
         disp(['Log-Posterior for model ', GRModelNames{iModel}, ' = ', num2str(logLikelihood)])
         
-        combined_GRModel = combined_GRModel.computeFIMs;
-        Happrox = combined_GRModel.FIM.totalFIM + diag(1./log10PriorStd(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit));
+        combined_GRModel = combined_GRModel.computeFIMs([],'log');
+        Happrox = combined_GRModel.FIM.totalFIM + diag(1./(log10PriorStd(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit).^2)/log(10)^2);
         k = length(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit);
         LaplaceEvidence(iModel) = logLikelihood + 0.5*k*log(2*pi) - 0.5*log(det(Happrox));
         S.(['laplaceEvidence_', GRModelNames{iModel}]) = LaplaceEvidence(iModel);
@@ -195,7 +195,7 @@ for iModel = GRmodel
         FIMGRraw = combined_GRModel.FIM.totalFIM;
         % add prior to FIM
         FIMGR = FIMGRraw +...
-            diag(1./log10PriorStd(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit))/log(10)^2;
+            diag(1./(log10PriorStd(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit).^2)/log(10)^2);
         FIMGR = (FIMGR+FIMGR')/2;
         covGR = 0.3*FIMGR^-1;
         
@@ -247,7 +247,7 @@ for iModel = GRmodel
 
     %% Compute FIM, H and Laplace approx of evidence
     % combined_GRModel = combined_GRModel.computeFIMs;
-    % Happrox = combined_GRModel.FIM.totalFIM + diag(1./log10PriorStd(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit));
+    % Happrox = combined_GRModel.FIM.totalFIM + diag(1./(log10PriorStd(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit).^2)/log(10)^2);
     % k = length(combined_GRModel.SSITModels{1}.fittingOptions.modelVarsToFit);
     % LaplaceEvidence(iModel) = GRLogPost(iModel) + 0.5*k*log(2*pi) - 0.5*log(det(Happrox));
 
@@ -782,7 +782,7 @@ end
 % Cytoplasmic Marginal Distributions, and the TS likelihood function.  We
 % consider three models of varying levels of complexity.
 
-if ~isempty(DUSP1modelcyt) && ~makePredictions % Skip this if only making predictions.
+if refitDUSP1cyt && ~isempty(DUSP1modelcyt) || ~makePredictions % Skip this if only making predictions.
     [DUSP1_Model_100nM,log10PriorMean,log10PriorStd] = ...
         dusp1ModelLibrary_Final('ModelDUSP1_100nM',false,modelLibrary);
 
@@ -959,7 +959,7 @@ if ~isempty(DUSP1modelcyt) && ~makePredictions % Skip this if only making predic
         ModelTS.parameters(indsFreePars,2) = num2cell(valsFreePars);
 
         % Solve once to generate SSA files
-        SSAModel_100 = SSAModel_100.solve;
+        SSAModel_100 = SSAModel_100.solve(solver='ssa');
 
         % DEBUG -- show mean of solution
         % mean(squeeze(SSAModel_100.Solutions.trajs(5:6,:,:)),3)'
@@ -1043,7 +1043,7 @@ if ~isempty(DUSP1modelcyt) && ~makePredictions % Skip this if only making predic
                 delete(MHFitOptions.saveFile)
 
                 MHFitOptions.progress = makePlots;
-                [valsFreePars,~,MHResultsAll] = SSAModel_100.maximizeLikelihood(valsFreePars',MHFitOptions,'MetropolisHastings');
+                [valsFreePars,~,MHResultsAll] = SSAModel_100.maximizeLikelihood(valsFreePars',MHFitOptions,'MetropolisHastings',returnType='pars');
                 delete(MHFitOptions.saveFile)
 
                 % Only update covPost if there are more accepted samples
