@@ -79,6 +79,18 @@ function out = fitSSAModels(model, opts)
 %   SeqABC_<tag>_calibration_<lossFun>.mat, SeqABC_<tag>_tuning.mat,
 %   SeqABC_<tag>_chain.mat (resume file), SeqABC_<tag>_MHResults.mat.
 % New-best plots: <figDir>/SeqABC_<tag>_best_marginals / _meanStd.
+%
+% Setup: the function changes to its own folder (the repository root) and
+% adds src and tmpPropensityFunctions to the path, so it can be started
+% from anywhere once fitSSAModels.m itself is on the path. The model
+% library (modelLibrary) is machine specific; it is rebuilt with
+% dusp1ModelLibrary_Final(..., regenerate=true) if it is missing, lacks
+% this model, cannot be loaded, or the model cannot be set up and solved
+% (or always, with regenerateLibrary=true). Rebuilding rewrites the whole
+% library file, so on a new machine run one model first (or rebuild once)
+% before starting several runs in parallel.
+%   useCluster (false) -- as in GR_DUSP1_Fitting_Final: rng('shuffle') and
+%                         run SSIT's install (in ssitDir, '../../SSIT').
 arguments
     model
     opts.parsFile = 'savedParameters/Parameters_Final_DUSP1_w_GR_Binning'
@@ -110,7 +122,30 @@ arguments
     opts.verbose (1,1) logical = true
     opts.plotNewBest (1,1) logical = true
     opts.figDir = 'savedFigures/SSALikelihood'
+    opts.dataFileGR = 'Data/GR_SSITcellresults_Final_Sep18.csv'
+    opts.regenerateLibrary (1,1) logical = false
+    opts.useCluster (1,1) logical = false
+    opts.ssitDir = '../../SSIT'
 end
+
+% Run from the repository root (all paths below are relative to it), with
+% this repository's code and propensity functions on the path.
+repoDir = fileparts(mfilename('fullpath'));
+cd(repoDir);
+addpath(genpath(fullfile(repoDir, 'src')));
+if opts.useCluster
+    % As GR_DUSP1_Fitting_Final(useCluster=true): new random seed and SSIT
+    % installed for this machine.
+    rng('shuffle');
+    addpath(genpath(opts.ssitDir));
+    curDir = pwd;
+    cd(opts.ssitDir);
+    install(0,0,0,1,0,1);
+    cd(curDir);
+end
+if ~isfolder('tmpPropensityFunctions'), mkdir('tmpPropensityFunctions'); end
+addpath(genpath(fullfile(repoDir, 'tmpPropensityFunctions')));
+
 cfg = modelConfig(model);
 if isempty(opts.usePrior), opts.usePrior = cfg.usePrior; end
 if isempty(opts.tag)
@@ -144,8 +179,23 @@ initWorkingParsFile(parsFile, opts.sourceParsFile, opts.grBinFile, opts.grBinMod
     opts.grInputScale, cfg, parName, covName);
 
 % Model, TS likelihood, and prior (as in GR_DUSP1_Fitting_Final).
-[SSAModel, ModelTS, allData, valsFreePars, log10PriorMean, log10PriorStd] = ...
-    setupModel(cfg, parsFile, opts.modelLibrary, opts.dataFileDusp1, parName);
+% The model library is machine specific (propensity functions and compiled
+% code): rebuild it if it is missing, lacks this model, or the model
+% cannot be set up and solved on this machine.
+ensureModelLibrary(cfg, opts.modelLibrary, opts.dataFileGR, opts.dataFileDusp1, opts.regenerateLibrary);
+try
+    [SSAModel, ModelTS, allData, valsFreePars, log10PriorMean, log10PriorStd] = ...
+        setupModel(cfg, parsFile, opts.modelLibrary, opts.dataFileDusp1, parName);
+catch err
+    if opts.regenerateLibrary
+        rethrow(err);   % already rebuilt in this call
+    end
+    fprintf('Setting up %s failed (%s); rebuilding the model library and retrying.\n', ...
+        cfg.name, err.message);
+    ensureModelLibrary(cfg, opts.modelLibrary, opts.dataFileGR, opts.dataFileDusp1, true);
+    [SSAModel, ModelTS, allData, valsFreePars, log10PriorMean, log10PriorStd] = ...
+        setupModel(cfg, parsFile, opts.modelLibrary, opts.dataFileDusp1, parName);
+end
 indsFreePars = cfg.indsFreePars;
 TSLikelihood = @(pars) computeTSlikelihood(pars, ModelTS, allData, 50, true, opts.outlierFraction);
 if opts.usePrior
@@ -325,6 +375,43 @@ switch k
         cfg.addCytReporter = true;
         cfg.tSpanFromMinus500 = true;
         cfg.fittingFinalModel = 10;
+end
+end
+
+function ensureModelLibrary(cfg, modelLibrary, dataFileGR, dataFileDusp1, force)
+% Make sure the model library exists and contains the models needed here;
+% otherwise (or if force) rebuild all models and propensity functions with
+% dusp1ModelLibrary_Final(..., regenerate=true), as GR_DUSP1_Fitting_Final
+% does on a new machine. The library file is shared by all runs: build it
+% once (e.g., with one run) before starting several runs in parallel.
+libFile = [char(modelLibrary), '.mat'];
+needed = {cfg.libraryName, 'ModelDUSP1_100nM', 'log10PriorMean', 'log10PriorStd'};
+rebuild = force || ~isfile(libFile);
+if ~rebuild
+    present = who('-file', libFile);
+    missing = setdiff(needed, present);
+    if ~isempty(missing)
+        fprintf('Model library %s lacks %s.\n', libFile, strjoin(missing, ', '));
+        rebuild = true;
+    end
+end
+if ~rebuild
+    try
+        M = dusp1ModelLibrary_Final(cfg.libraryName, false, modelLibrary);
+        assert(~isempty(M.propensityFunctions) && ~isempty(M.stoichiometry) && ...
+            ~isempty(M.parameters) && ~isempty(M.dataSet), 'incomplete model');
+    catch err
+        fprintf('Loading %s from %s failed (%s).\n', cfg.libraryName, libFile, err.message);
+        rebuild = true;
+    end
+end
+if rebuild
+    fprintf('Rebuilding the model library %s (all models and propensity functions). Please wait.\n', libFile);
+    dusp1ModelLibrary_Final(cfg.libraryName, true, modelLibrary, dataFileGR, dataFileDusp1);
+    missing = setdiff(needed, who('-file', libFile));
+    if ~isempty(missing)
+        error('fitSSAModels:library', 'Rebuilt %s still lacks %s.', libFile, strjoin(missing, ', '));
+    end
 end
 end
 
