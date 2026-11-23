@@ -558,8 +558,8 @@ SSAModel.solutionScheme = 'SSA';
 if isunix && ~ismac && cfg.fittingFinalModel < 10
     % GR_DUSP1_Fitting_Final always turns the C++ SSA off here (quiet
     % failures with nonlinear propensities on Linux). Instead, test it:
-    % use the C++ SSA only if it reproduces the MATLAB SSA.
-    SSAModel.ssaOptions.useC = cppSSAMatchesMatlab(SSAModel, 1000);
+    % use the C++ SSA only if it reproduces the MATLAB SSA and is faster.
+    SSAModel.ssaOptions.useC = useCppSSA(SSAModel, 1000);
 end
 % Write and compile the SSA code for this (possibly modified) model once.
 SSAModel.ssaOptions.computeFile = '';
@@ -577,27 +577,35 @@ ModelTS.fittingOptions.modelVarsToFit = indsFreePars;
 ModelTS.parameters(indsFreePars,2) = num2cell(valsFreePars);
 end
 
-function ok = cppSSAMatchesMatlab(model, nSims)
-% Run nSims SSA trajectories with the C++ and with the MATLAB SSA at the
-% model's current parameters and compare the mean and variance of every
-% species at every time. Returns true (use C++) only if the C++ run
-% succeeds, gives finite results of the right size, and E[x] and E[x^2]
-% agree within 5 standard errors (plus 1% relative slack) everywhere.
-% Standard errors come from the samples of x and x^2 themselves, so the
-% test stays valid for rare events (e.g., gene states that switch a few
-% times in nSims runs).
+function useC = useCppSSA(model, nSims)
+% Decide whether to use the C++ SSA: run nSims SSA trajectories with the
+% C++ and with the MATLAB SSA at the model's current parameters. Returns
+% true (use C++) only if
+%   1. the C++ run succeeds and gives finite results of the right size;
+%   2. the mean and variance of every species at every time agree: E[x]
+%      and E[x^2] within 5 standard errors (plus 1% relative slack).
+%      Standard errors come from the samples of x and x^2 themselves, so
+%      the test stays valid for rare events (e.g., gene states that switch
+%      a few times in nSims runs); and
+%   3. the C++ SSA is faster. Each version is first written/compiled and
+%      run once (not timed), then the nSims runs are timed with the
+%      compiled code, as in the fit (which reuses the compiled code).
 model.ssaOptions.nSimsPerExpt = NaN;
 model.ssaOptions.Nsims = nSims;
 fprintf('Testing the C++ SSA against the MATLAB SSA (%d runs each)...\n', nSims);
 try
     MC = model; MC.ssaOptions.useC = true;  MC.ssaOptions.computeFile = '';
     MM = model; MM.ssaOptions.useC = false; MM.ssaOptions.computeFile = '';
+    % Write/compile once (untimed); the returned models keep the code.
+    MC = MC.solve(solver='ssa');
+    MM = MM.solve(solver='ssa');
+    % Timed runs with the compiled code; these are also compared.
     tic; solC = MC.solve(returnType='soln'); tC = toc;
     tic; solM = MM.solve(returnType='soln'); tM = toc;
     XC = double(solC.trajs); XM = double(solM.trajs);
     if ~isequal(size(XC), size(XM)) || any(~isfinite(XC(:)))
         fprintf('C++ SSA output has the wrong size or non-finite values; using the MATLAB SSA.\n');
-        ok = false; return
+        useC = false; return
     end
     bad = false(size(XC,1), size(XC,2), 2);
     for k = 1:2
@@ -606,20 +614,25 @@ try
         se = sqrt((var(fC, 0, 3) + var(fM, 0, 3))/nSims);
         bad(:,:,k) = abs(mC - mM) > 5*se + 0.01*max(abs(mC), abs(mM)) + 1e-9;
     end
-    ok = ~any(bad(:));
     mC = mean(XC, 3); mM = mean(XM, 3); sC = std(XC, 0, 3); sM = std(XM, 0, 3);
-    if ok
-        fprintf(['C++ and MATLAB SSA agree; using the C++ SSA (test times, including ', ...
-            'writing/compiling the code: C++ %.1f s, MATLAB %.1f s).\n'], tC, tM);
-    else
+    if any(bad(:))
         [iSp, iT] = find(any(bad, 3), 1);
         fprintf(['C++ and MATLAB SSA disagree (%d of %d mean/variance checks fail; e.g., species %d, ', ...
             'time index %d: mean %.3g vs %.3g, std %.3g vs %.3g); using the MATLAB SSA.\n'], ...
             nnz(bad), numel(bad), iSp, iT, mC(iSp,iT), mM(iSp,iT), sC(iSp,iT), sM(iSp,iT));
+        useC = false;
+    elseif tC >= tM
+        fprintf(['C++ and MATLAB SSA agree, but C++ is not faster (%.2f s vs %.2f s for %d runs); ', ...
+            'using the MATLAB SSA.\n'], tC, tM, nSims);
+        useC = false;
+    else
+        fprintf('C++ and MATLAB SSA agree and C++ is faster (%.2f s vs %.2f s for %d runs); using the C++ SSA.\n', ...
+            tC, tM, nSims);
+        useC = true;
     end
 catch err
     fprintf('C++ SSA test failed (%s); using the MATLAB SSA.\n', err.message);
-    ok = false;
+    useC = false;
 end
 end
 
